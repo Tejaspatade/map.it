@@ -16,7 +16,14 @@ const CountryList = ({ cities, isLoading }) => {
 			/>
 		);
 
-	const countries = cities.reduce((acc, curr) => [], []);
+	const countries = cities.reduce((array, city, i) => {
+		if (!array.map((el) => el.country).includes(city.country))
+			return [
+				...array,
+				{ country: city.country, emoji: city.emoji, id: i },
+			];
+		else return array;
+	}, []);
 
 	return (
 		<ul className={styles.countryList}>

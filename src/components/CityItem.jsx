@@ -3,8 +3,9 @@ import React from "react";
 import styles from "./CityItem.module.css";
 
 // Utility Function
+// Convert Flag Emoji to PNG for Windows since not supported
 const flagemojiToPNG = (flag) => {
-	var countryCode = Array.from(flag, (codeUnit) => codeUnit.codePointAt())
+	let countryCode = Array.from(flag, (codeUnit) => codeUnit.codePointAt())
 		.map((char) => String.fromCharCode(char - 127397).toLowerCase())
 		.join("");
 	return (
@@ -12,6 +13,7 @@ const flagemojiToPNG = (flag) => {
 	);
 };
 
+// Formatting date passed in
 const formatDate = (date) =>
 	new Intl.DateTimeFormat("en", {
 		day: "numeric",

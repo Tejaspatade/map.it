@@ -4,8 +4,12 @@ import styles from "./CountryList.module.css";
 import Spinner from "./Spinner";
 import CountryItem from "./CountryItem";
 import Message from "./Message";
+import { useCities } from "../context/CitiesContext";
 
-const CountryList = ({ cities, isLoading }) => {
+const CountryList = () => {
+	// Consuming Context from CitiesProvider with its custom hooks
+	const { cities, isLoading } = useCities();
+
 	// Conditional Rendering
 	if (isLoading) return <Spinner />;
 

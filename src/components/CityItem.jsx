@@ -3,7 +3,7 @@ import React from "react";
 import styles from "./CityItem.module.css";
 import { Link } from "react-router-dom";
 
-// Utility Function
+// Utility Functions
 // Convert Flag Emoji to PNG for Windows since not supported
 const flagemojiToPNG = (flag) => {
 	let countryCode = Array.from(flag, (codeUnit) => codeUnit.codePointAt())

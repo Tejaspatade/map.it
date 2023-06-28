@@ -18,9 +18,7 @@ const Map = () => {
 			onClick={() => {
 				navigate("form");
 			}}
-		>
-			Map {lat} {lng}
-		</div>
+		></div>
 	);
 };
 

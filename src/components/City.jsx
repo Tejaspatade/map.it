@@ -2,20 +2,12 @@ import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 
 import styles from "./City.module.css";
-import { useCities } from "../context/CitiesContext";
+
 import Spinner from "./Spinner";
+import BackButton from "./BackButton";
+import { useCities } from "../context/CitiesContext";
 
 // Utility Functions
-// Convert Flag Emoji to PNG for Windows since not supported
-const flagemojiToPNG = (flag) => {
-	let countryCode = Array.from(flag, (codeUnit) => codeUnit.codePointAt())
-		.map((char) => String.fromCharCode(char - 127397).toLowerCase())
-		.join("");
-	return (
-		<img src={`https://flagcdn.com/24x18/${countryCode}.png`} alt="flag" />
-	);
-};
-
 // Formatting date passed in
 const formatDate = (date) =>
 	new Intl.DateTimeFormat("en", {
@@ -37,7 +29,7 @@ function City() {
 	}, [id]);
 
 	// Derived State
-	const { cityName, date, notes, emoji } = currentCity;
+	const { cityName, date, notes } = currentCity;
 
 	// Conditional Rendering
 	if (isLoading) return <Spinner />;
@@ -46,9 +38,7 @@ function City() {
 		<div className={styles.city}>
 			<div className={styles.row}>
 				<h6>City name</h6>
-				<h3>
-					<span>{flagemojiToPNG(emoji)}</span> {cityName}
-				</h3>
+				<h3>🏙️ {cityName}</h3>
 			</div>
 
 			<div className={styles.row}>
@@ -74,9 +64,9 @@ function City() {
 				</a>
 			</div>
 
-			{/* <div>
-				<ButtonBack />
-			</div> */}
+			<div>
+				<BackButton />
+			</div>
 		</div>
 	);
 }

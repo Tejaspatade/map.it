@@ -7,37 +7,47 @@ import {
 	useMap,
 	useMapEvents,
 } from "react-leaflet";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import styles from "./Map.module.css";
+
+import Button from "./Button";
 import { useCities } from "../context/CitiesContext";
+import { useGeolocation } from "../hooks/useGeoLocation";
+import { useUrlCoords } from "../hooks/useUrlCoords";
 
 const Map = () => {
 	// Consuming Context from CitiesProvider
 	const { cities } = useCities();
 
-	// Router-DOM Hooks
-	const [searchParams] = useSearchParams();
-
-	// Hooks
+	// React & Custom Hooks
 	const [mapPosition, setMapPosition] = useState([40, 0]);
-
-	// Derived state
-	const lat = searchParams.get("lat");
-	const lng = searchParams.get("lng");
+	const [lat, lng] = useUrlCoords();
+	const {
+		isLoading: isLoadingLocation,
+		position: geoLocation,
+		getLocation,
+	} = useGeolocation();
 
 	// Updating Map Position state as a side-effect
 	useEffect(() => {
 		if (lat && lng) setMapPosition([lat, lng]);
 	}, [lat, lng]);
 
+	// Set map to focus onto user's current location as a side-effect
+	useEffect(() => {
+		if (geoLocation) setMapPosition([geoLocation.lat, geoLocation.lng]);
+	}, [geoLocation]);
+
 	return (
-		<div
-			className={styles.mapContainer}
-			// onClick={() => {
-			// 	navigate("form");
-			// }}
-		>
+		<div className={styles.mapContainer}>
+			{!geoLocation && (
+				<Button type="position" onClick={getLocation}>
+					{isLoadingLocation
+						? "Loading..."
+						: "Use Your Current Location"}
+				</Button>
+			)}
 			<MapContainer
 				center={mapPosition}
 				zoom={10}

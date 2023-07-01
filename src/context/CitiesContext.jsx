@@ -1,47 +1,130 @@
 import React from "react";
 import { useContext } from "react";
-import { createContext, useState, useEffect } from "react";
+import { createContext, useReducer, useEffect } from "react";
 
 const CitiesContext = createContext();
 
 // Localhost for json-server to fetch data
 const BASE_URL = "http://localhost:8000";
 
+// Using Reducer rather than State
+const initialState = {
+	cities: [],
+	isLoading: false,
+	currentCity: {},
+	error: "",
+};
+
+const reducer = (state, action) => {
+	switch (action.type) {
+		case "loading":
+			return {
+				...state,
+				isLoading: true,
+			};
+
+		case "cities/loaded":
+			return {
+				...state,
+				isLoading: false,
+				cities: action.payload,
+			};
+
+		case "city/loaded":
+			return {
+				...state,
+				isLoading: false,
+				currentCity: action.payload,
+			};
+
+		case "city/created":
+			return {
+				...state,
+				isLoading: false,
+				cities: [...state.cities, action.payload],
+			};
+
+		case "city/deleted":
+			return {
+				...state,
+				isLoading: false,
+				cities: state.cities.filter(
+					(city) => city.id !== action.payload
+				),
+			};
+
+		case "rejected":
+			return {
+				...state,
+				isLoading: false,
+				error: action.payload,
+			};
+
+		default:
+			throw new Error("This is a wrong action. ");
+	}
+};
+
 const CitiesProvider = ({ children }) => {
-	// State
-	const [cities, setCities] = useState([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [currentCity, setCurrentCity] = useState({});
+	// Reducer for State
+	const [{ cities, isLoading, currentCity }, dispatch] = useReducer(
+		reducer,
+		initialState
+	);
 
 	// Fetching City List as a side-effect on mount
 	useEffect(() => {
-		setIsLoading(true);
-		fetch(`${BASE_URL}/cities`)
-			.then((res) => res.json())
-			.then((data) => setCities(data))
-			.catch((err) => console.error(err.message))
-			.finally(setIsLoading(false));
+		// Async Function Defined
+		const fetchCities = async () => {
+			try {
+				// Loading Starts
+				dispatch({ type: "loading" });
+
+				// Fetching Data
+				const res = await fetch(`${BASE_URL}/cities`);
+				const data = await res.json();
+
+				// Guard Clause
+				if (!data) throw new Error("Data Fetch Unsuccessfull");
+
+				// Dispatching Action to Reducer
+				dispatch({ type: "cities/loaded", payload: data });
+			} catch (err) {
+				// Error Action Dispatched to Reducer
+				dispatch({ type: "rejected", payload: err.message });
+			}
+		};
+
+		// Invoking Async Function
+		fetchCities();
 	}, []);
 
+	// Fetching city details
 	const fetchCity = async (id) => {
 		try {
-			setIsLoading(true);
+			// Loading Starts
+			dispatch({ type: "loading" });
+
+			// Fetching City Info
 			const res = await fetch(`${BASE_URL}/cities/${id}`);
 			const data = await res.json();
 
+			// Guard Clause
 			if (!data) throw new Error("Data Fetch Unsuccessfull");
 
-			setCurrentCity(data);
+			// Dispatching Action to Reducer
+			dispatch({ type: "city/loaded", payload: data });
 		} catch (err) {
-			console.error(err);
-		} finally {
-			setIsLoading(false);
+			// Error Action Dispatched to Reducer
+			dispatch({ type: "rejected", payload: err.message });
 		}
 	};
 
+	// Adding new city
 	const postCity = async (newCity) => {
 		try {
-			setIsLoading(true);
+			// Loading Starts
+			dispatch({ type: "loading" });
 
 			// Sending New City
 			const res = await fetch(`${BASE_URL}/cities`, {
@@ -54,20 +137,45 @@ const CitiesProvider = ({ children }) => {
 			const data = await res.json();
 
 			// Guard Clause
-			if (!data) throw new Error("Data Fetch Unsuccessfull");
+			if (!data) throw new Error("Data Post Unsuccessfull");
+
+			// Adding to Reducer.. Not Ideal.. Must Use React Query
+			dispatch({ type: "city/created", payload: data });
+		} catch (err) {
+			// Error Action Dispatched to Reducer
+			dispatch({ type: "rejected", payload: err.message });
+		}
+	};
+
+	// Delete City
+	const deleteCity = async (id) => {
+		try {
+			// Loading Starts
+			dispatch({ type: "loading" });
+
+			// Deleting City
+			await fetch(`${BASE_URL}/cities/${id}`, {
+				method: "DELETE",
+			});
 
 			// Adding to State.. Not Ideal.. Must Use React Query
-			setCities((cities) => [...cities, data]);
+			dispatch({ type: "city/deleted", payload: id });
 		} catch (err) {
-			console.error(err);
-		} finally {
-			setIsLoading(false);
+			// Error Action Dispatched to Reducer
+			dispatch({ type: "rejected", payload: err.message });
 		}
 	};
 
 	return (
 		<CitiesContext.Provider
-			value={{ cities, currentCity, isLoading, fetchCity, postCity }}
+			value={{
+				cities,
+				currentCity,
+				isLoading,
+				fetchCity,
+				postCity,
+				deleteCity,
+			}}
 		>
 			{children}
 		</CitiesContext.Provider>

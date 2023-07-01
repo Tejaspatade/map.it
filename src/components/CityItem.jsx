@@ -30,10 +30,19 @@ const formatDate = (date) =>
 
 const CityItem = ({ city }) => {
 	//
-	const { currentCity } = useCities();
+	const { currentCity, deleteCity } = useCities();
 
 	// Derived State
 	const { cityName, emoji, date, id, position } = city;
+
+	// Event Handlers
+	const handleClick = (e) => {
+		// Avoid from event propagating up the DOM tree
+		e.preventDefault();
+
+		// Deleting city from API
+		deleteCity(id);
+	};
 
 	return (
 		<li>
@@ -46,7 +55,9 @@ const CityItem = ({ city }) => {
 				<span className={styles.emoji}>{flagemojiToPNG(emoji)}</span>
 				<h3 className={styles.name}>{cityName}</h3>
 				<time className={styles.date}>({formatDate(date)})</time>
-				<button className={styles.deleteBtn}>&times;</button>
+				<button className={styles.deleteBtn} onClick={handleClick}>
+					&times;
+				</button>
 			</Link>
 		</li>
 	);

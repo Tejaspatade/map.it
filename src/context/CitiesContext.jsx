@@ -39,9 +39,35 @@ const CitiesProvider = ({ children }) => {
 		}
 	};
 
+	const postCity = async (newCity) => {
+		try {
+			setIsLoading(true);
+
+			// Sending New City
+			const res = await fetch(`${BASE_URL}/cities`, {
+				method: "POST",
+				body: JSON.stringify(newCity),
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+			const data = await res.json();
+
+			// Guard Clause
+			if (!data) throw new Error("Data Fetch Unsuccessfull");
+
+			// Adding to State.. Not Ideal.. Must Use React Query
+			setCities((cities) => [...cities, data]);
+		} catch (err) {
+			console.error(err);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
 	return (
 		<CitiesContext.Provider
-			value={{ cities, isLoading, fetchCity, currentCity }}
+			value={{ cities, currentCity, isLoading, fetchCity, postCity }}
 		>
 			{children}
 		</CitiesContext.Provider>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useCallback } from "react";
 import { useContext } from "react";
 import { createContext, useReducer, useEffect } from "react";
 
@@ -102,28 +103,31 @@ const CitiesProvider = ({ children }) => {
 	}, []);
 
 	// Fetching city details
-	const fetchCity = async (id) => {
-		// Check if Current City is same as city needed to be fetched
-		if (Number(id) === currentCity.id) return;
+	const fetchCity = useCallback(
+		async (id) => {
+			// Check if Current City is same as city needed to be fetched
+			if (Number(id) === currentCity.id) return;
 
-		try {
-			// Loading Starts
-			dispatch({ type: "loading" });
+			try {
+				// Loading Starts
+				dispatch({ type: "loading" });
 
-			// Fetching City Info
-			const res = await fetch(`${BASE_URL}/cities/${id}`);
-			const data = await res.json();
+				// Fetching City Info
+				const res = await fetch(`${BASE_URL}/cities/${id}`);
+				const data = await res.json();
 
-			// Guard Clause
-			if (!data) throw new Error("Data Fetch Unsuccessfull");
+				// Guard Clause
+				if (!data) throw new Error("Data Fetch Unsuccessfull");
 
-			// Dispatching Action to Reducer
-			dispatch({ type: "city/loaded", payload: data });
-		} catch (err) {
-			// Error Action Dispatched to Reducer
-			dispatch({ type: "rejected", payload: err.message });
-		}
-	};
+				// Dispatching Action to Reducer
+				dispatch({ type: "city/loaded", payload: data });
+			} catch (err) {
+				// Error Action Dispatched to Reducer
+				dispatch({ type: "rejected", payload: err.message });
+			}
+		},
+		[currentCity.id]
+	);
 
 	// Adding new city
 	const postCity = async (newCity) => {

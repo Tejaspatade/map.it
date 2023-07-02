@@ -26,7 +26,7 @@ function City() {
 	// Fetching the current city id data from server as a side-effect
 	useEffect(() => {
 		fetchCity(id);
-	}, [id]);
+	}, [id, fetchCity]);
 
 	// Derived State
 	const { cityName, date, notes } = currentCity;
